@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Putzplan H & C</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f7f3ec;
+    --paper:     #fdfaf5;
+    --surface:   #f0ebe1;
+    --border:    #e0d8cc;
+    --ink:       #2c2418;
+    --muted:     #9a8f7e;
+    --faint:     #cfc8ba;
+    --sage:      #7a9e7e;
+    --sage-soft: #eaf2eb;
+    --sage-mid:  #b8d4bb;
+    --terra:     #b87057;
+    --terra-soft:#f5ede8;
+    --sand:      #c9a87c;
+    --sand-soft: #f7f0e4;
+    --accent-h:  #b05e3a;
+    --accent-c:  #4e7c55;
+    --done:      #5a9460;
+    --shadow:    0 4px 24px rgba(44,36,24,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,24,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Jost', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2.5rem 1rem 5rem;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239a8f7e' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(122,158,126,0.13) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -60px; left: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(201,168,124,0.12) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── header ── */
+  header { text-align: center; margin-bottom: 2.2rem; position: relative; z-index: 1; }
+  .header-eyebrow { font-size: 0.65rem; letter-spacing: 3.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 9vw, 5rem); font-weight: 600; letter-spacing: -1px; line-height: 0.95; color: var(--ink); }
+  .header-title .h { color: var(--accent-h); }
+  .header-title .amp { font-style: italic; font-weight: 400; color: var(--sand); margin: 0 0.1em; font-size: 0.85em; }
+  .header-title .c { color: var(--accent-c); }
+  .header-deco { display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 0.9rem; }
+  .header-deco-line { height: 1px; width: 48px; background: var(--border); }
+  .header-deco-leaf { font-size: 1rem; opacity: 0.6; }
+
+  /* ── week nav ── */
+  .week-nav-wrap {
+    max-width: 480px; margin: 0 auto 0.6rem;
+    background: var(--paper); border: 1px solid var(--border); border-radius: 100px;
+    padding: 0.65rem 0.8rem; display: flex; align-items: center; justify-content: space-between;
+    gap: 0.8rem; box-shadow: var(--shadow); position: relative; z-index: 1;
+  }
+  .week-nav-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 50%;
+    width: 36px; height: 36px; font-size: 0.95rem; cursor: pointer; color: var(--ink);
+    transition: background 0.15s, border-color 0.15s;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .week-nav-btn:hover { background: var(--sage-soft); border-color: var(--sage-mid); }
+  .week-label { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 600; text-align: center; flex: 1; color: var(--ink); }
+  .current-tag { text-align: center; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 2rem; position: relative; z-index: 1; }
+  .current-tag.this-week { color: var(--sage); font-weight: 500; }
+
+  /* ── columns ── */
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+  @media (max-width: 520px) { .columns { grid-template-columns: 1fr; } }
+
+  /* ── person card ── */
+  .person-card {
+    background: var(--paper); border-radius: 22px; padding: 1.7rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: box-shadow 0.4s;
+  }
+  .person-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 22px 22px 0 0;
+  }
+  .h-card::before { background: linear-gradient(90deg, var(--accent-h), var(--sand)); }
+  .c-card::before { background: linear-gradient(90deg, var(--accent-c), var(--sage-mid)); }
+  .person-card::after {
+    content: '🌿'; position: absolute; bottom: 12px; right: 14px;
+    font-size: 2.2rem; opacity: 0.07; pointer-events: none; transform: rotate(-20deg);
+  }
+
+  /* ── all-done overlay ── */
+  .done-overlay {
+    position: absolute; inset: 0; border-radius: 22px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.5rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 10;
+  }
+  .h-card .done-overlay { background: rgba(253,250,245,0.93); }
+  .c-card .done-overlay { background: rgba(253,250,245,0.93); }
+  .done-overlay.visible { opacity: 1; pointer-events: auto; }
+
+  .done-checkmark {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    animation: pop 0.4s cubic-bezier(.36,1.4,.64,1) both;
+  }
+  .h-card .done-checkmark { background: var(--accent-h); color: white; box-shadow: 0 4px 20px rgba(176,94,58,0.35); }
+  .c-card .done-checkmark { background: var(--accent-c); color: white; box-shadow: 0 4px 20px rgba(78,124,85,0.35); }
+
+  @keyframes pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+
+  .done-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; font-weight: 600; color: var(--ink);
+    letter-spacing: 0.5px;
+  }
+  .done-sublabel {
+    font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+  }
+  .done-undo-btn {
+    margin-top: 0.5rem;
+    font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); background: none; border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.3em 0.9em; cursor: pointer;
+    transition: background 0.13s;
+    font-family: 'Jost', sans-serif;
+  }
+  .done-undo-btn:hover { background: var(--surface); }
+
+  /* ── person header ── */
+  .person-header { display: flex; align-items: flex-end; gap: 0.5rem; margin-bottom: 1.4rem; }
+  .person-name { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; line-height: 1; }
+  .h-card .person-name { color: var(--accent-h); }
+  .c-card .person-name { color: var(--accent-c); }
+  .person-badge { font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 0.2em 0.6em; border: 1px solid var(--border); border-radius: 100px; margin-bottom: 0.25rem; background: var(--surface); }
+
+  /* ── task group ── */
+  .task-group { margin-bottom: 1rem; }
+  .group-label { font-size: 0.58rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--faint); margin-bottom: 0.4rem; padding-left: 0.3rem; }
+
+  /* ── task item ── */
+  .task-item {
+    display: flex; align-items: flex-start; gap: 0.7rem;
+    padding: 0.6rem 0.65rem; border-radius: 12px; cursor: pointer;
+    transition: background 0.13s, transform 0.12s;
+    user-select: none; margin-bottom: 0.25rem; border: 1px solid transparent;
+  }
+  .task-item:hover { background: var(--surface); border-color: var(--border); transform: translateX(3px); }
+  .task-item.done { background: var(--sage-soft); border-color: var(--sage-mid); }
+
+  .task-checkbox {
+    width: 21px; height: 21px; border-radius: 6px; border: 1.5px solid var(--faint);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s; font-size: 0.75rem; margin-top: 0.1rem; background: white;
+  }
+  .h-card .task-item.done .task-checkbox { background: var(--accent-h); border-color: var(--accent-h); color: white; }
+  .c-card .task-item.done .task-checkbox { background: var(--accent-c); border-color: var(--accent-c); color: white; }
+
+  .task-icon { font-size: 0.95rem; flex-shrink: 0; margin-top: 0.12rem; opacity: 0.8; }
+
+  .task-text-wrap { display: flex; flex-direction: column; gap: 0.18rem; flex: 1; min-width: 0; }
+  .task-text { font-size: 0.875rem; font-weight: 500; line-height: 1.3; color: var(--ink); transition: opacity 0.18s; }
+  .task-item.done .task-text { opacity: 0.38; text-decoration: line-through; text-decoration-color: var(--faint); }
+  .task-details { font-size: 0.7rem; font-weight: 400; color: var(--muted); line-height: 1.45; transition: opacity 0.18s; }
+  .task-item.done .task-details { opacity: 0.3; }
+  .auz-badge {
+    display: inline-flex; align-items: center; gap: 0.2em;
+    background: var(--sand-soft); border: 1px solid rgba(201,168,124,0.35); border-radius: 5px;
+    padding: 0.08em 0.4em; font-size: 0.62rem; letter-spacing: 0.3px; color: var(--terra);
+    margin-top: 0.2rem; width: fit-content;
+  }
+
+  /* ── notes textarea ── */
+  .notes-label { font-size: 0.58rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--faint); margin-bottom: 0.4rem; padding-left: 0.3rem; display: block; }
+  .notes-area {
+    width: 100%; border: 1px dashed var(--faint); border-radius: 12px;
+    padding: 0.65rem 0.75rem; font-family: 'Jost', sans-serif;
+    font-size: 0.8rem; font-weight: 400; color: var(--ink);
+    background: transparent; outline: none; resize: none;
+    line-height: 1.6; min-height: 68px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .notes-area::placeholder { color: var(--faint); font-style: italic; }
+  .notes-area:focus { border-color: var(--sage-mid); border-style: solid; background: var(--sage-soft); }
+
+  /* ── divider & progress ── */
+  .card-divider { height: 1px; background: var(--border); margin: 1rem 0 0.85rem; }
+  .progress-bar-wrap { background: var(--surface); border-radius: 100px; height: 5px; overflow: hidden; }
+  .h-card .progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent-h), var(--sand)); transition: width 0.45s cubic-bezier(.4,0,.2,1); }
+  .c-card .progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent-c), var(--sage-mid)); transition: width 0.45s cubic-bezier(.4,0,.2,1); }
+  .progress-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+  .progress-label { font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .progress-pct { font-size: 0.68rem; font-weight: 600; color: var(--done); }
+  .progress-pct.zero { color: var(--faint); }
+
+  /* ── footer ── */
+  footer { text-align: center; margin-top: 2.5rem; font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--faint); position: relative; z-index: 1; }
+  footer .fh { color: var(--accent-h); }
+  footer .fc { color: var(--accent-c); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Haushalt &nbsp;·&nbsp; Wöchentlich</div>
+  <div class="header-title">
+    <span class="h">H</span><span class="amp">&</span><span class="c">C</span>
+  </div>
+  <div class="header-deco">
+    <div class="header-deco-line"></div>
+    <span class="header-deco-leaf">🌱</span>
+    <div class="header-deco-line"></div>
+  </div>
+</header>
+
+<div class="week-nav-wrap">
+  <button class="week-nav-btn" id="prevWeek">&#8592;</button>
+  <div class="week-label" id="weekLabel">—</div>
+  <button class="week-nav-btn" id="nextWeek">&#8594;</button>
+</div>
+<div class="current-tag" id="currentTag">Lädt…</div>
+
+<div class="columns" id="columns"></div>
+
+<footer>Wechsel jeden Sonntag &nbsp;·&nbsp; <span class="fh">H</span> & <span class="fc">C</span></footer>
+
+<script>
+// ── helpers ───────────────────────────────────────────────────────────────────
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return { week: Math.ceil((((d - yearStart) / 86400000) + 1) / 7), year: d.getUTCFullYear() };
+}
+function getMondayOf(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0) ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function weekKey(monday) {
+  const { week, year } = getISOWeek(monday);
+  return `${year}-W${String(week).padStart(2,'0')}`;
+}
+function formatWeekLabel(monday) {
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit' });
+  return `${fmt(monday)} – ${fmt(sunday)}`;
+}
+
+// ── task definitions ──────────────────────────────────────────────────────────
+const TASKS = {
+  H: { name:'H', sets:[
+    [ // slot 0: Bad + Dreamitri
+      { id:'h-bad',  icon:'🚿', group:'Putzdienst 1', label:'Bad reinigen', details:'Dusche, Klo & Ablagen' },
+      { id:'h-dim',  icon:'🤖', group:'Putzdienst 1', label:'Dreamitri laufen lassen', details:'Staubsauger starten & Ecken von Hand' },
+      { id:'h-shh',  icon:'🛏️', group:'Eigenes Zimmer', label:'Schlafzimmer H', details:'Abstauben, Boden, Ordnung' },
+      { id:'h-wz',   icon:'🌿', group:'Gießen', label:'Pflanzen im Wohnzimmer', details:'Immer H' },
+    ],
+    [ // slot 1: Küche + WZ + Müll
+      { id:'h-kue',  icon:'🍽️', group:'Putzdienst 2', label:'Küche putzen', details:'Ablagen & Geräte', auz:'Backofen oder Kühlschrank reinigen' },
+      { id:'h-wohn', icon:'🛋️', group:'Putzdienst 2', label:'Wohnzimmer putzen', details:'Ablagen & allgemeine Ordnung' },
+      { id:'h-mll',  icon:'🗑️', group:'Putzdienst 2', label:'Müll rausbringen', details:'Restmüll', auz:'Altglas & Pfand' },
+      { id:'h-shh',  icon:'🛏️', group:'Eigenes Zimmer', label:'Schlafzimmer H', details:'Abstauben, Boden, Ordnung' },
+      { id:'h-wz',   icon:'🌿', group:'Gießen', label:'Pflanzen im Wohnzimmer', details:'Immer H' },
+    ],
+  ]},
+  C: { name:'C', sets:[
+    [ // slot 0: Küche + WZ + Müll
+      { id:'c-kue',  icon:'🍽️', group:'Putzdienst 2', label:'Küche putzen', details:'Ablagen & Geräte', auz:'Backofen oder Kühlschrank reinigen' },
+      { id:'c-wohn', icon:'🛋️', group:'Putzdienst 2', label:'Wohnzimmer putzen', details:'Ablagen & allgemeine Ordnung' },
+      { id:'c-mll',  icon:'🗑️', group:'Putzdienst 2', label:'Müll rausbringen', details:'Restmüll', auz:'Altglas & Pfand' },
+      { id:'c-shc',  icon:'🛏️', group:'Eigenes Zimmer', label:'Schlafzimmer C (Gästezimmer)', details:'Abstauben, Boden, Ordnung' },
+      { id:'c-rest', icon:'🌱', group:'Gießen', label:'Alle anderen Pflanzen', details:'Immer C' },
+    ],
+    [ // slot 1: Bad + Dreamitri
+      { id:'c-bad',  icon:'🚿', group:'Putzdienst 1', label:'Bad reinigen', details:'Dusche, Klo & Ablagen' },
+      { id:'c-dim',  icon:'🤖', group:'Putzdienst 1', label:'Dreamitri laufen lassen', details:'Staubsauger starten & Ecken von Hand' },
+      { id:'c-shc',  icon:'🛏️', group:'Eigenes Zimmer', label:'Schlafzimmer C (Gästezimmer)', details:'Abstauben, Boden, Ordnung' },
+      { id:'c-rest', icon:'🌱', group:'Gießen', label:'Alle anderen Pflanzen', details:'Immer C' },
+    ],
+  ]},
+};
+
+const ANCHOR = new Date(2025, 0, 6);
+function slotForMonday(monday) {
+  const msPerWeek = 7*24*60*60*1000;
+  const diff = Math.round((monday - ANCHOR) / msPerWeek);
+  return ((diff % 2) + 2) % 2;
+}
+
+let currentMonday = getMondayOf(new Date());
+
+// ── storage helpers ───────────────────────────────────────────────────────────
+function sk(monday, person, taskId) { return `putzplan_${weekKey(monday)}_${person}_${taskId}`; }
+function isDone(monday, person, taskId) { return localStorage.getItem(sk(monday, person, taskId)) === '1'; }
+function toggleDone(monday, person, taskId) {
+  const key = sk(monday, person, taskId);
+  localStorage.getItem(key) === '1' ? localStorage.removeItem(key) : localStorage.setItem(key, '1');
+}
+function notesKey(monday, person) { return `putzplan_notes_${weekKey(monday)}_${person}`; }
+
+// ── build details HTML ────────────────────────────────────────────────────────
+function buildDetailsHTML(task) {
+  let html = '';
+  if (task.details) html += `<span class="task-details">${task.details}</span>`;
+  if (task.auz) html += `<span class="auz-badge">✦ ab &amp; zu: ${task.auz}</span>`;
+  return html;
+}
+
+// ── render ────────────────────────────────────────────────────────────────────
+function render() {
+  const today = getMondayOf(new Date());
+  const isThisWeek = currentMonday.getTime() === today.getTime();
+
+  document.getElementById('weekLabel').textContent = formatWeekLabel(currentMonday);
+  const tag = document.getElementById('currentTag');
+  tag.textContent = isThisWeek ? '🌿 Aktuelle Woche' : (currentMonday < today ? 'Vergangene Woche' : 'Zukünftige Woche');
+  tag.className = 'current-tag' + (isThisWeek ? ' this-week' : '');
+
+  const slot = slotForMonday(currentMonday);
+  const cols = document.getElementById('columns');
+  cols.innerHTML = '';
+
+  ['H','C'].forEach(person => {
+    const def = TASKS[person];
+    const tasks = def.sets[slot];
+
+    const card = document.createElement('div');
+    card.className = `person-card ${person.toLowerCase()}-card`;
+
+    // ── done overlay ──
+    const overlay = document.createElement('div');
+    overlay.className = 'done-overlay';
+    overlay.innerHTML = `
+      <div class="done-checkmark">✓</div>
+      <div class="done-label">Alles erledigt!</div>
+      <div class="done-sublabel">${person} ist fertig diese Woche</div>
+      <button class="done-undo-btn">Zurück</button>
+    `;
+    overlay.querySelector('.done-undo-btn').addEventListener('click', () => overlay.classList.remove('visible'));
+    card.appendChild(overlay);
+
+    // ── person header ──
+    const header = document.createElement('div');
+    header.className = 'person-header';
+    header.innerHTML = `<div class="person-name">${person}</div><div class="person-badge">diese Woche</div>`;
+    card.appendChild(header);
+
+    // ── task groups ──
+    const groups = {};
+    tasks.forEach(t => { if (!groups[t.group]) groups[t.group] = []; groups[t.group].push(t); });
+
+    let doneCount = 0;
+    let totalCount = 0;
+
+    Object.entries(groups).forEach(([grpName, grpTasks]) => {
+      const grpDiv = document.createElement('div');
+      grpDiv.className = 'task-group';
+      grpDiv.innerHTML = `<div class="group-label">${grpName}</div>`;
+
+      grpTasks.forEach(task => {
+        const done = isDone(currentMonday, person, task.id);
+        if (done) doneCount++;
+        totalCount++;
+
+        const item = document.createElement('div');
+        item.className = 'task-item' + (done ? ' done' : '');
+        item.innerHTML = `
+          <div class="task-checkbox">${done ? '✓' : ''}</div>
+          <span class="task-icon">${task.icon}</span>
+          <span class="task-text-wrap">
+            <span class="task-text">${task.label}</span>
+            ${buildDetailsHTML(task)}
+          </span>
+        `;
+        item.addEventListener('click', () => { toggleDone(currentMonday, person, task.id); render(); });
+        grpDiv.appendChild(item);
+      });
+
+      card.appendChild(grpDiv);
+    });
+
+    // ── progress ──
+    const pct = totalCount ? Math.round(doneCount / totalCount * 100) : 0;
+    const progWrap = document.createElement('div');
+    progWrap.innerHTML = `
+      <div class="card-divider"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">${doneCount} / ${totalCount} erledigt</span>
+        <span class="progress-pct ${pct===0?'zero':''}">${pct>0?pct+' %':''}</span>
+      </div>
+    `;
+    card.appendChild(progWrap);
+
+    // ── notes textarea ──
+    const notesWrap = document.createElement('div');
+    notesWrap.style.marginTop = '1rem';
+    const savedNotes = localStorage.getItem(notesKey(currentMonday, person)) || '';
+    const textarea = document.createElement('textarea');
+    textarea.className = 'notes-area';
+    textarea.placeholder = 'Aufgaben oder Notizen hinzufügen …';
+    textarea.value = savedNotes;
+    textarea.addEventListener('input', () => {
+      localStorage.setItem(notesKey(currentMonday, person), textarea.value);
+      // auto-grow
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+    // auto-grow on load
+    setTimeout(() => { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }, 0);
+    notesWrap.appendChild(textarea);
+    card.appendChild(notesWrap);
+
+    cols.appendChild(card);
+
+    // ── show overlay if all done ──
+    if (totalCount > 0 && doneCount === totalCount) {
+      requestAnimationFrame(() => overlay.classList.add('visible'));
+    }
+  });
+}
+
+document.getElementById('prevWeek').addEventListener('click', () => {
+  currentMonday = new Date(currentMonday);
+  currentMonday.setDate(currentMonday.getDate() - 7);
+  render();
+});
+document.getElementById('nextWeek').addEventListener('click', () => {
+  currentMonday = new Date(currentMonday);
+  currentMonday.setDate(currentMonday.getDate() + 7);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
